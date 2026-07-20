@@ -212,8 +212,12 @@ def main():
             try:
                 content = get_content(client, doc_id)
                 res = llm_abstract_trade(title, content)
-                abstract, trade = res if res else fallback(title, content)
-                set_custom_fields(client, doc, abstract, trade)
+                if res:
+                    abstract = res[0]  # AI content summary
+                    trade = cf_value(doc, TRADE_FIELD_ID) or guess_trade(title)  # keep existing trade
+                else:
+                    abstract, trade = fallback(title, content)
+                set_custom_fields(client, doc, abstract or "", trade)
                 done += 1
                 print(f"  #{doc_id:>3} [{trade:<20}] {title[:50]}")
             except Exception as e:
