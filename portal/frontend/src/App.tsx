@@ -70,32 +70,16 @@ function Login({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function Viewer({ doc, id, onClose }: { doc: Doc | null; id: number; onClose: () => void }) {
-  const [text, setText] = useState<string | null>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-  useEffect(() => {
-    let cancelled = false;
-    setText(null);
-    fetch(`/api/documents/${id}`, { headers: authHeader() })
-      .then((r) => r.json())
-      .then((d) => !cancelled && setText(d.content || ""))
-      .catch(() => !cancelled && setText(""));
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
   return (
     <div className="viewer" onClick={onClose}>
       <div className="viewer-bar" onClick={(e) => e.stopPropagation()}>
         <span className="viewer-title">{doc?.title ?? `Document #${id}`}</span>
-        <a
-          href={`/api/documents/${id}/download?token=${token()}`}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={`/api/documents/${id}/download?token=${token()}`} target="_blank" rel="noreferrer">
           Download PDF
         </a>
         <button onClick={onClose}>Close ✕</button>
@@ -107,11 +91,11 @@ function Viewer({ doc, id, onClose }: { doc: Doc | null; id: number; onClose: ()
             {doc.abstract}
           </div>
         )}
-        {text === null
-          ? "Loading…"
-          : text
-            ? text
-            : "(No extractable text for this document — use Download PDF to view the original, e.g. for plan drawings.)"}
+        <iframe
+          className="pdf-frame"
+          src={`/api/documents/${id}/preview?token=${token()}`}
+          title={doc?.title ?? "document"}
+        />
       </div>
     </div>
   );

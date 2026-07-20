@@ -229,14 +229,20 @@ body {
 }
 .viewer-text {
   flex: 1;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  background: #525659;
+  overflow: hidden;
+}
+.viewer-text .summary {
+  margin: 14px 16px 0;
+}
+.pdf-frame {
+  flex: 1;
+  margin: 14px 16px 16px;
+  border: 0;
+  border-radius: 6px;
   background: #fff;
-  color: #1f2933;
-  padding: 24px 32px;
-  font-size: 14px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-wrap: break-word;
 }
 .summary {
   background: #f1f5f9;
