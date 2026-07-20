@@ -1,0 +1,24 @@
+# secrets / env (keep .env.example)
+.env
+.env.prod
+paperless-ngx/.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# node
+node_modules/
+portal/frontend/dist/
+
+# local-only source data (large)
+Brookfield/
+pdfs/
+output/
+
+# editor / os / scratch
+.DS_Store
+.claude/
+.vscode/
+portal/frontend/drive_verify.mjs

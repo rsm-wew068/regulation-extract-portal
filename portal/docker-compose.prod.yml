@@ -1,0 +1,72 @@
+# Production stack: Paperless-ngx (PRIVATE) + FastAPI backend + Caddy (public, HTTPS).
+#
+# Paperless has NO published port — only `backend` reaches it at http://webserver:8000.
+# Coworkers hit only Caddy (the frontend + /api), never Paperless.
+#
+# Run from the portal/ dir after creating .env.prod (see .env.prod.example):
+#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+services:
+  broker:
+    image: docker.io/library/redis:8
+    restart: unless-stopped
+    volumes: ["redisdata:/data"]
+
+  db:
+    image: docker.io/library/postgres:18
+    restart: unless-stopped
+    volumes: ["pgdata:/var/lib/postgresql"]
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on: [db, broker]
+    # NOTE: deliberately no `ports:` — webserver stays private on the compose network.
+    volumes:
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media
+      - ./export:/usr/src/paperless/export
+      - ./consume:/usr/src/paperless/consume
+    env_file: ../paperless-ngx/docker-compose.env
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}
+      PAPERLESS_URL: https://${DOMAIN}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: https://${DOMAIN}
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on: [webserver]
+    environment:
+      PAPERLESS_API_URL: http://webserver:8000
+      PAPERLESS_API_TOKEN: ${PAPERLESS_API_TOKEN}
+      ABSTRACT_FIELD_ID: ${ABSTRACT_FIELD_ID:-1}
+      TRADE_FIELD_ID: ${TRADE_FIELD_ID:-2}
+      CORS_ORIGINS: https://${DOMAIN}
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [backend]
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/dist:/srv/frontend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  data: {}
+  media: {}
+  pgdata: {}
+  redisdata: {}
+  caddy_data: {}
+  caddy_config: {}

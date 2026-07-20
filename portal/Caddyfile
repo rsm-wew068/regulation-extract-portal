@@ -1,0 +1,17 @@
+# Caddy fronts everything with automatic HTTPS (Let's Encrypt).
+# {$DOMAIN} is read from the DOMAIN env var (set in .env.prod).
+{$DOMAIN} {
+	encode gzip zstd
+
+	# API + document streaming -> FastAPI backend
+	handle /api/* {
+		reverse_proxy backend:8001
+	}
+
+	# Everything else -> the built React SPA (with history fallback)
+	handle {
+		root * /srv/frontend
+		try_files {path} /index.html
+		file_server
+	}
+}
