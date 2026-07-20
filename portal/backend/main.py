@@ -10,7 +10,7 @@ import hashlib
 import hmac
 import json
 
-from fastapi import Body, FastAPI, HTTPException, Query
+from fastapi import Body, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -127,21 +127,12 @@ def doc_file(doc_id: int, kind: str):
     if kind not in _FILE_KINDS:
         raise HTTPException(400, "kind must be one of: preview, download, thumb")
     resp = P.stream(doc_id, kind)
-    headers = {
-        "content-type": resp.headers.get("content-type", "application/octet-stream")
-    }
-    # Forward Content-Disposition so preview=inline (browser displays) and
-    # download=attachment (saves to disk). X-Frame-Options is intentionally
-    # dropped so the in-app <iframe> viewer can embed the PDF.
+    try:
+        body = resp.read()  # full bytes, auto-decompressed by httpx
+    finally:
+        resp.close()
+    headers = {"content-type": resp.headers.get("content-type", "application/octet-stream")}
     cd = resp.headers.get("content-disposition")
     if cd:
         headers["content-disposition"] = cd
-
-    def gen():
-        try:
-            for chunk in resp.iter_raw():
-                yield chunk
-        finally:
-            resp.close()
-
-    return StreamingResponse(gen(), headers=headers)
+    return Response(content=body, headers=headers)

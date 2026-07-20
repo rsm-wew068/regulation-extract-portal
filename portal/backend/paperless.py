@@ -23,7 +23,11 @@ class Paperless:
     def __init__(self):
         self.base = PAPERLESS_API_URL
         self.client = httpx.Client(
-            headers={"Authorization": f"Token {PAPERLESS_API_TOKEN}"}, timeout=60
+            headers={
+                "Authorization": f"Token {PAPERLESS_API_TOKEN}",
+                "Accept-Encoding": "identity",  # don't let Paperless gzip — we stream raw bytes
+            },
+            timeout=60,
         )
         self.abstract_fid = ABSTRACT_FIELD_ID
         self.trade_fid = TRADE_FIELD_ID
