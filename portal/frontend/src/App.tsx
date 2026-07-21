@@ -70,32 +70,48 @@ function Login({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function Viewer({ doc, id, onClose }: { doc: Doc | null; id: number; onClose: () => void }) {
+  const [showPdf, setShowPdf] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+  useEffect(() => {
+    let cancelled = false;
+    setSummary(null);
+    fetch(`/api/documents/${id}`, { headers: authHeader() })
+      .then((r) => r.json())
+      .then((d) => !cancelled && setSummary(d.summary || d.abstract || ""))
+      .catch(() => !cancelled && setSummary(""));
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
   return (
     <div className="viewer" onClick={onClose}>
       <div className="viewer-bar" onClick={(e) => e.stopPropagation()}>
         <span className="viewer-title">{doc?.title ?? `Document #${id}`}</span>
+        <button className="toggle" onClick={() => setShowPdf((p) => !p)}>
+          {showPdf ? "View Summary" : "View PDF"}
+        </button>
         <a href={`/api/documents/${id}/download?token=${token()}`} target="_blank" rel="noreferrer">
-          Download PDF
+          Download
         </a>
         <button onClick={onClose}>Close ✕</button>
       </div>
       <div className="viewer-text" onClick={(e) => e.stopPropagation()}>
-        {doc?.abstract && (
-          <div className="summary">
-            <span className="summary-label">Summary</span>
-            {doc.abstract}
+        {showPdf ? (
+          <iframe
+            className="pdf-frame"
+            src={`/api/documents/${id}/preview?token=${token()}`}
+            title={doc?.title ?? "document"}
+          />
+        ) : (
+          <div className="summary-pane">
+            {summary === null ? "Loading…" : summary || "(No summary available yet.)"}
           </div>
         )}
-        <iframe
-          className="pdf-frame"
-          src={`/api/documents/${id}/preview?token=${token()}`}
-          title={doc?.title ?? "document"}
-        />
       </div>
     </div>
   );

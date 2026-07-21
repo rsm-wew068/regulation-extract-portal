@@ -234,8 +234,16 @@ body {
   background: #525659;
   overflow: hidden;
 }
-.viewer-text .summary {
-  margin: 14px 16px 0;
+.summary-pane {
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+  color: #1f2933;
+  padding: 28px 36px;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 .pdf-frame {
   flex: 1;
@@ -243,6 +251,18 @@ body {
   border: 0;
   border-radius: 6px;
   background: #fff;
+}
+.toggle {
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid #4b5563;
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.toggle:hover {
+  background: #2c3440;
 }
 .summary {
   background: #f1f5f9;

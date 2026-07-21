@@ -14,7 +14,7 @@ from fastapi import Body, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from .config import CORS_ORIGINS, PORTAL_PASSWORD, PORTAL_SECRET
+from .config import CORS_ORIGINS, PORTAL_PASSWORD, PORTAL_SECRET, SUMMARIES_FILE
 from .paperless import P
 
 app = FastAPI(title="Document Portal API")
@@ -119,7 +119,26 @@ def document(doc_id: int):
     doc = P.get(doc_id)
     out = P.serialize(doc)
     out["content"] = doc.get("content") or ""
+    out["summary"] = _summaries().get(str(doc_id), "")
     return out
+
+
+# Rich summaries from summaries.json (reloads when the file changes).
+_sm_cache = {"mtime": 0.0, "data": {}}
+
+
+def _summaries():
+    try:
+        m = SUMMARIES_FILE.stat().st_mtime
+    except OSError:
+        return _sm_cache["data"]
+    if m != _sm_cache["mtime"]:
+        try:
+            _sm_cache["data"] = json.loads(SUMMARIES_FILE.read_text())
+        except Exception:
+            _sm_cache["data"] = {}
+        _sm_cache["mtime"] = m
+    return _sm_cache["data"]
 
 
 @app.get("/api/documents/{doc_id}/{kind}")
