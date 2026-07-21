@@ -183,7 +183,7 @@ export default function App() {
 
   return (
     <>
-    <main className="app" {...((openId !== null ? { inert: "" } : {}) as any)}>
+    <main className="app">
       <header className="header">
         <div>
           <h1>Document Portal</h1>
@@ -200,11 +200,13 @@ export default function App() {
         <input
           className="search"
           placeholder="Search documents (e.g. cabinet, vanity, hardware)…"
+          aria-label="Search documents"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
         <select
           value={projectId}
+          aria-label="Project"
           onChange={(e) => setProjectId(e.target.value === "" ? "" : Number(e.target.value))}
         >
           <option value="">All projects</option>
@@ -214,7 +216,7 @@ export default function App() {
             </option>
           ))}
         </select>
-        <select value={trade} onChange={(e) => setTrade(e.target.value)}>
+        <select value={trade} aria-label="Trade" onChange={(e) => setTrade(e.target.value)}>
           <option value="">All trades</option>
           {facets.trades.map((t) => (
             <option key={t} value={t}>
@@ -222,7 +224,7 @@ export default function App() {
             </option>
           ))}
         </select>
-        <select value={source} onChange={(e) => setSource(e.target.value)}>
+        <select value={source} aria-label="Source" onChange={(e) => setSource(e.target.value)}>
           <option value="">All sources</option>
           {facets.sources.map((s) => (
             <option key={s} value={s}>
