@@ -89,7 +89,7 @@ function Viewer({ doc, id, onClose }: { doc: Doc | null; id: number; onClose: ()
     };
   }, [id]);
   return (
-    <div className="viewer" onClick={onClose}>
+    <div className="viewer" role="dialog" aria-modal="true" aria-label={doc?.title ?? "Document"} onClick={onClose}>
       <div className="viewer-bar" onClick={(e) => e.stopPropagation()}>
         <span className="viewer-title">{doc?.title ?? `Document #${id}`}</span>
         <button className="toggle" onClick={() => setShowPdf((p) => !p)}>
@@ -182,7 +182,8 @@ export default function App() {
   const tk = token();
 
   return (
-    <div className="app">
+    <>
+    <main className="app" {...((openId !== null ? { inert: "" } : {}) as any)}>
       <header className="header">
         <div>
           <h1>Document Portal</h1>
@@ -309,13 +310,14 @@ export default function App() {
         </div>
       )}
 
-      {openId !== null && (
-        <Viewer
-          doc={data?.results.find((d) => d.id === openId) ?? null}
-          id={openId}
-          onClose={() => setOpenId(null)}
-        />
-      )}
-    </div>
+    </main>
+    {openId !== null && (
+      <Viewer
+        doc={data?.results.find((d) => d.id === openId) ?? null}
+        id={openId}
+        onClose={() => setOpenId(null)}
+      />
+    )}
+    </>
   );
 }
