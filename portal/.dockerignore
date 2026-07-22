@@ -1,0 +1,13 @@
+# Backend image only needs backend/ + summaries.json. Keep the context small.
+frontend/
+scripts/
+node_modules/
+**/__pycache__/
+*.pyc
+.venv/
+.env
+.env.*
+Caddyfile
+serve-public.sh
+dev.sh
+docker-compose*.yml
