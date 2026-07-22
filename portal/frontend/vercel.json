@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://edward-intro-arbor-contributors.trycloudflare.com/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://backend-production-a50b7.up.railway.app/api/:path*" }
   ]
 }

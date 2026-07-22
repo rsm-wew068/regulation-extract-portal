@@ -1,0 +1,11 @@
+frontend/
+scripts/
+.venv/
+**/__pycache__/
+*.pyc
+.env
+.env.*
+Caddyfile
+serve-public.sh
+dev.sh
+docker-compose.prod.yml

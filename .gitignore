@@ -22,3 +22,6 @@ output/
 .claude/
 .vscode/
 portal/frontend/drive_verify.mjs
+
+# one-time migration artifact
+paperless-ngx/export/
