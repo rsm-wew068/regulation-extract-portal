@@ -32,6 +32,11 @@ Nothing to configure. Exposes `REDIS_URL`.
 - **Attach a Volume** (`Add → Volume`) mounted at **`/data`**. This one volume
   holds all persistent Paperless state (see the DATA_DIR/MEDIA_ROOT vars below),
   so the container's own `/usr/src/paperless` code dir is never shadowed.
+  **Size: start at ~10 GB** (current data is 2.6 GB — leaves room to grow). This
+  volume is permanent: it survives deploys, restarts, and redeploys. You can
+  increase the size later. (No automated backup is configured — the same
+  `document_exporter` used for migration can be scheduled off-Railway later if
+  point-in-time recovery is ever wanted.)
 - **Do NOT** add a public domain. Keep it private.
 - Variables (use Railway variable references for the DB/Redis ones):
 
